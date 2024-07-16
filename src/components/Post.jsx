@@ -10,7 +10,7 @@ export default function Post() {
                     alt="Album"
                 />
                 <div className="flex items-center text-center absolute bottom-5 left-5 h-fit">
-                    <div>
+                    <div className="cursor-pointer">
                         <Heart />
                     </div>
                     <div>25.6K</div>
