@@ -1,13 +1,20 @@
 import { Link } from "react-router-dom";
+import Heart from "../icons/Heart";
 
 export default function Post() {
     return (
         <div className="card lg:card-side bg-base-100 shadow-xl">
-            <figure>
+            <figure className="relative">
                 <img
                     src="https://img.daisyui.com/images/stock/photo-1494232410401-ad00d5433cfa.jpg"
                     alt="Album"
                 />
+                <div className="flex items-center text-center absolute bottom-5 left-5 h-fit">
+                    <div>
+                        <Heart />
+                    </div>
+                    <div>25.6K</div>
+                </div>
             </figure>
             <div className="card-body">
                 <h2 className="card-title">New album is released!</h2>
