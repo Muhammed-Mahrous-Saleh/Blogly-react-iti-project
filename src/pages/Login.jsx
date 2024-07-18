@@ -1,8 +1,31 @@
-import React from "react";
+import React, { useState } from "react";
+import { auth } from "../config/firebase";
+import {
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+} from "firebase/auth";
 
 export default function Login() {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [isLoginMode, setIsLoginMode] = useState(true);
+
+    const handleSignin = async () => {
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleRegister = async () => {
+        try {
+            await createUserWithEmailAndPassword(auth, email, password);
+        } catch (err) {
+            console.error(err);
+        }
+    };
     // const mode = "register";
-    let isLoginMode = true;
     return (
         <dialog id="my_modal_1" className="modal">
             <div className="modal-box">
@@ -11,7 +34,7 @@ export default function Login() {
                         ✕
                     </button>
                 </form>
-                <div className="mt-20 flex flex-col gap-5 w-96 mx-auto">
+                <div className="mt-20 flex flex-col gap-5 w-96 mx-auto pb-8">
                     <label className="input input-bordered flex items-center gap-2">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -26,6 +49,8 @@ export default function Login() {
                             type="text"
                             className="grow"
                             placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                         />
                     </label>
                     {!isLoginMode && (
@@ -62,6 +87,8 @@ export default function Login() {
                             type="password"
                             className="grow"
                             placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                         />
                     </label>
                     {!isLoginMode && (
@@ -87,8 +114,16 @@ export default function Login() {
                     )}
 
                     <button
-                        className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mb-12"
+                        className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
                         to="/login-register"
+                        onClick={async () => {
+                            if (isLoginMode) {
+                                await handleSignin();
+                            } else {
+                                await handleRegister();
+                            }
+                            document.getElementById("my_modal_1").close();
+                        }}
                     >
                         {isLoginMode ? "Login" : "Register"}
                     </button>
@@ -99,11 +134,10 @@ export default function Login() {
                         <a
                             className="text-blue-800 cursor-pointer"
                             onClick={() => {
-                                isLoginMode = !isLoginMode;
-                                console.log(isLoginMode);
+                                setIsLoginMode(!isLoginMode);
                             }}
                         >
-                            {isLoginMode === "login" ? `Register.` : `Login.`}
+                            {isLoginMode ? `Register.` : `Login.`}
                         </a>
                     </p>
                 </div>
