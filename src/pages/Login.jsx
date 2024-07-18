@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { auth } from "../config/firebase";
 import {
     createUserWithEmailAndPassword,
@@ -24,6 +24,15 @@ export default function Login() {
         } catch (err) {
             console.error(err);
         }
+    };
+
+    const handleSigninRegister = async () => {
+        if (isLoginMode) {
+            await handleSignin();
+        } else {
+            await handleRegister();
+        }
+        document.getElementById("my_modal_1").close();
     };
     // const mode = "register";
     return (
@@ -116,14 +125,7 @@ export default function Login() {
                     <button
                         className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
                         to="/login-register"
-                        onClick={async () => {
-                            if (isLoginMode) {
-                                await handleSignin();
-                            } else {
-                                await handleRegister();
-                            }
-                            document.getElementById("my_modal_1").close();
-                        }}
+                        onClick={handleSigninRegister}
                     >
                         {isLoginMode ? "Login" : "Register"}
                     </button>
