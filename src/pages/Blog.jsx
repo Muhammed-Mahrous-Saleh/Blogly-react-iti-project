@@ -2,21 +2,44 @@ import { Link } from "react-router-dom";
 import Post from "../components/Post";
 import PlusSign from "../icons/PlusSign";
 import { useAuth } from "../context/AuthContext";
+import { db } from "../config/firebase";
+import { getDocs, collection, doc } from "firebase/firestore";
+import { useEffect, useState } from "react";
 
 export default function Blog() {
+    const [posts, setPosts] = useState([]);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                // getdata
+                const postCollectionRef = collection(db, "posts");
+                const res = await getDocs(postCollectionRef);
+                const data = res.docs.map((doc) => ({
+                    ...doc.data(),
+                    id: doc.id,
+                }));
+                // update data state with fetched data
+                setPosts(data);
+            } catch (err) {
+                console.error(err);
+            }
+        })();
+    }, []);
+    console.log("posts", posts);
     const { currentUser } = useAuth();
     return (
         <div className="flex flex-col gap-5 my-7 w-full items-center mt-20">
-            <Post />
-            <Post />
             {currentUser && (
                 <Link
-                    to="/post/add"
-                    className="btn btn-circle bg-blue-700 hover:bg-blue-800 text-white self-end me-32"
+                    to="/post-new"
+                    className="fixed bottom-10 btn btn-circle bg-blue-700 hover:bg-blue-800 text-white self-end me-32"
                 >
                     <PlusSign />
                 </Link>
             )}
+            <Post />
+            <Post />
         </div>
     );
 }

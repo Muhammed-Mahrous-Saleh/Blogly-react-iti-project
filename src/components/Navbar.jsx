@@ -3,7 +3,7 @@ import Login from "../pages/Login";
 import { auth } from "../config/firebase";
 import { signOut } from "firebase/auth";
 import { useAuth } from "../context/AuthContext";
-import { toast } from "react-toastify";
+import { notify } from "../helpers/toastify";
 
 function NavBar() {
     // let currentUser = false;
@@ -12,13 +12,12 @@ function NavBar() {
     const handleLogOut = async () => {
         try {
             signOut(auth);
-            notify("Failed to sign out, check network connection!", "error");
+            notify("Signed out successfully", "success");
         } catch (err) {
             notify("Failed to sign out, check network connection!", "error");
         }
     };
 
-    const notify = (msg, msgType) => toast(msg, { type: msgType });
     return (
         <div className="navbar bg-base-100 container mx-auto">
             <div className="navbar-start">

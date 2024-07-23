@@ -2,7 +2,7 @@ import "./App.css";
 import Navbar from "./components/Navbar";
 import Blog from "./pages/Blog";
 import { Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
+// import Login from "./pages/Login";
 import { ToastContainer } from "react-toastify";
 import RouteNotFound from "./pages/RouteNotFound";
 
@@ -27,7 +27,8 @@ function App() {
             />
             <Routes>
                 <Route path="/" element={<Blog />}></Route>
-                <Route path="/login-register" element={<Login />}></Route>
+                <Route path="/post" element={<Blog />}></Route>
+                {/* <Route path="/login-register" element={<Login />}></Route> */}
                 <Route path="*" element={<RouteNotFound />}></Route>
             </Routes>
         </div>
