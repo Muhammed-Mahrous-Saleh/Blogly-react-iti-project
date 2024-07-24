@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { auth, db } from "../config/firebase";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { useAuth } from "../context/AuthContext";
 import {
     createUserWithEmailAndPassword,
-    onAuthStateChanged,
     signInWithEmailAndPassword,
 } from "firebase/auth";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import EmailIcon from "../icons/EmailIcon";
 import UserIcon from "../icons/UserIcon";
 import KeyIcon from "../icons/KeyIcon";
-import { collection, addDoc, doc, getDoc } from "firebase/firestore";
 import { notify } from "../helpers/toastify";
 
 const validationSchema = Yup.object({
@@ -34,30 +34,25 @@ const validationSchema = Yup.object({
 
 export default function Login() {
     const [isLoginMode, setIsLoginMode] = useState(true);
-    const [currentUser, setCurrentUser] = useState(null);
-
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                fetchUserInfo(user.uid);
-            } else {
-                setCurrentUser(null);
-            }
-        });
-        return () => unsubscribe();
-    }, []);
-
-    const fetchUserInfo = async (uid) => {
-        const userDoc = doc(db, "users", uid);
-        const userSnapshot = await getDoc(userDoc);
-        if (userSnapshot.exists()) {
-            setCurrentUser(userSnapshot.data());
-        }
-    };
+    const { userInfo, currentUser } = useAuth();
 
     const closeModal = () => {
         document.getElementById("my_modal_1").close();
     };
+
+    const fetchUserInfo = async (uid) => {
+        try {
+            const userDoc = doc(db, "users", uid);
+            const userSnapshot = await getDoc(userDoc);
+            if (userSnapshot.exists()) {
+                return userSnapshot.data();
+            }
+        } catch (error) {
+            console.error("Error fetching user info:", error);
+        }
+        return null;
+    };
+
     const formik = useFormik({
         initialValues: {
             email: "",
@@ -69,53 +64,51 @@ export default function Login() {
         onSubmit: async (values) => {
             if (isLoginMode) {
                 try {
-                    await signInWithEmailAndPassword(
+                    const { user } = await signInWithEmailAndPassword(
                         auth,
                         values.email,
                         values.password
-                    )
-                        .then(() => {
-                            notify("Logged in successfully.", "success");
-                            closeModal();
-                        })
-                        .catch(() => {
-                            notify(
-                                "Email or Password is incorrect, please try again.",
-                                "error"
-                            );
-                        });
-                } catch (err) {
-                    console.error(err);
+                    );
+                    const userInfo = await fetchUserInfo(user.uid);
+                    notify(
+                        `Logged in successfully, Welcome back ${
+                            userInfo ? userInfo.username : ""
+                        }`,
+                        "success"
+                    );
+                    closeModal();
+                } catch (error) {
+                    notify(
+                        "Email or Password is incorrect, please try again.",
+                        "error"
+                    );
+                    console.error("Login error:", error);
                 }
             } else {
                 try {
-                    await createUserWithEmailAndPassword(
+                    const { user } = await createUserWithEmailAndPassword(
                         auth,
                         values.email,
                         values.password
-                    )
-                        .then(({ user }) => {
-                            return addDoc(collection(db, "users"), {
-                                uid: user.uid,
-                                email: values.email,
-                                username: values.username,
-                            });
-                        })
-                        .then(() => {
-                            notify(
-                                `Registered successfully, Hello.`,
-                                "success"
-                            );
-                            closeModal();
-                        })
-                        .catch(() => {
-                            notify(
-                                "Failed to register, please make sure of correct inputs.",
-                                "error"
-                            );
-                        });
-                } catch (err) {
-                    console.error(err);
+                    );
+                    await setDoc(doc(db, "users", user.uid), {
+                        uid: user.uid,
+                        email: values.email,
+                        username: values.username,
+                    });
+
+                    const userInfo = await fetchUserInfo(user.uid);
+                    notify(
+                        `Registered successfully, Hello ${userInfo.username}.`,
+                        "success"
+                    );
+                    closeModal();
+                } catch (error) {
+                    notify(
+                        "Failed to register, please make sure of correct inputs.",
+                        "error"
+                    );
+                    console.error("Registration error:", error);
                 }
             }
         },
@@ -211,7 +204,6 @@ export default function Login() {
                                 ) : null}
                             </div>
                         )}
-
                         <button
                             type="submit"
                             className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
