@@ -93,7 +93,7 @@ export default function Post({ postId }) {
     };
 
     const handleEdit = () => {
-        navigate(`/post/${postId}`, { state: { post } }); // Pass the current post data to the edit page
+        navigate(`/post`, { state: { post } }); // Pass the current post data to the edit page
     };
 
     if (!post || !postUser) {

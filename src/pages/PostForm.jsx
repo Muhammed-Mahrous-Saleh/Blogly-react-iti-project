@@ -9,10 +9,12 @@ import {
     getDownloadURL,
     deleteObject,
 } from "firebase/storage";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { notify } from "../helpers/toastify";
 
-function PostForm({ onSubmit, initialPost }) {
+export default function PostForm({ onSubmit }) {
+    const { state } = useLocation();
+    const initialPost = state?.post;
     const [title, setTitle] = useState(initialPost?.title || "");
     const [body, setBody] = useState(initialPost?.body || "");
     const [image, setImage] = useState(initialPost?.image || null);
@@ -30,7 +32,7 @@ function PostForm({ onSubmit, initialPost }) {
         } else {
             setPreview(null);
         }
-    }, [image]);
+    }, [image, initialPost]);
 
     const postsCollectionRef = collection(db, "posts");
 
@@ -46,7 +48,6 @@ function PostForm({ onSubmit, initialPost }) {
             title,
             body,
             userId: currentUser.uid,
-            userName: currentUser.displayName,
             postImage: postImageUrl,
             likes: [], // Initialize likes as an empty array
         };
@@ -181,5 +182,3 @@ function PostForm({ onSubmit, initialPost }) {
         </div>
     );
 }
-
-export default PostForm;
