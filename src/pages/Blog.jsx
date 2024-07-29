@@ -35,10 +35,8 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
                 console.error(err);
             }
         })();
-        console.log(posts);
     }, []);
     const { currentUser } = useAuth();
-    console.log("posts", posts);
     return (
         <div className="flex flex-col gap-5 my-7 w-full items-center mt-20">
             {currentUser && (
@@ -52,7 +50,11 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
                 </Link>
             )}
             {posts.map((post) => (
-                <Post key={post.id} postId={post.id} />
+                <Post
+                    key={post.id}
+                    postId={post.id}
+                    handleEdit={() => handleEditPost(post)}
+                />
             ))}
         </div>
     );

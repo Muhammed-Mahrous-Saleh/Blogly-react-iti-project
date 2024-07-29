@@ -17,8 +17,8 @@ export default function PostForm({ onSubmit }) {
     const initialPost = state?.post;
     const [title, setTitle] = useState(initialPost?.title || "");
     const [body, setBody] = useState(initialPost?.body || "");
-    const [image, setImage] = useState(initialPost?.image || null);
-    const [preview, setPreview] = useState(null);
+    const [image, setImage] = useState(null);
+    const [preview, setPreview] = useState(initialPost?.postImage || null);
     const { currentUser } = useAuth();
     const navigate = useNavigate();
 
@@ -29,6 +29,8 @@ export default function PostForm({ onSubmit }) {
                 setPreview(reader.result);
             };
             reader.readAsDataURL(image);
+        } else if (initialPost) {
+            setPreview(initialPost.postImage);
         } else {
             setPreview(null);
         }
@@ -63,7 +65,7 @@ export default function PostForm({ onSubmit }) {
 
     const updatePost = async () => {
         let postImageUrl = initialPost.postImage;
-        if (image && image !== initialPost.image) {
+        if (image && image !== initialPost.postImage) {
             if (initialPost.postImage) {
                 // Delete the old image from Firebase Storage
                 const oldImageRef = ref(storage, initialPost.postImage);
