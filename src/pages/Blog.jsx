@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Post from "../components/Post";
 import PlusSign from "../icons/PlusSign";
 import { useAuth } from "../context/AuthContext";
@@ -7,7 +7,17 @@ import { getDocs, collection, doc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
 // eslint-disable-next-line react/prop-types
-export default function Blog({ posts, setPosts }) {
+export default function Blog({ posts, setPosts, setEditingPost }) {
+    const navigator = useNavigate();
+    function handleAddPost(e) {
+        e.preventDefault();
+        setEditingPost(null);
+        navigator("/post");
+    }
+    function handleEditPost(post) {
+        setEditingPost(post);
+        navigator("/post");
+    }
     useEffect(() => {
         (async () => {
             try {
@@ -26,13 +36,14 @@ export default function Blog({ posts, setPosts }) {
         })();
         console.log(posts);
     }, []);
-    console.log("posts", posts);
     const { currentUser } = useAuth();
     return (
         <div className="flex flex-col gap-5 my-7 w-full items-center mt-20">
             {currentUser && (
                 <Link
-                    to="/post-new"
+                    onClick={(e) => {
+                        handleAddPost(e);
+                    }}
                     className="fixed bottom-10 btn btn-circle bg-blue-700 hover:bg-blue-800 text-white self-end me-32"
                 >
                     <PlusSign />

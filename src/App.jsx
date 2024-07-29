@@ -10,6 +10,14 @@ import "react-toastify/dist/ReactToastify.css";
 import PostForm from "./pages/PostForm";
 import { useState } from "react";
 
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "./config/firebase";
+
+const postsCollectionRef = collection(db, "posts");
+const createPost = async () => {
+    await addDoc(postsCollectionRef, {});
+};
+
 function App() {
     const [editingPost, setEditingPost] = useState(null);
     const [posts, setPosts] = useState([]);
@@ -46,7 +54,13 @@ function App() {
             <Routes>
                 <Route
                     path="/"
-                    element={<Blog posts={posts} setPosts={setPosts} />}
+                    element={
+                        <Blog
+                            posts={posts}
+                            setPosts={setPosts}
+                            setEditingPost={setEditingPost}
+                        />
+                    }
                 ></Route>
                 <Route
                     path="/post"
