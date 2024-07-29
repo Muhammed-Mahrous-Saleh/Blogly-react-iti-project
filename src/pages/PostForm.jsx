@@ -1,4 +1,10 @@
-import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
+import {
+    addDoc,
+    collection,
+    doc,
+    serverTimestamp,
+    updateDoc,
+} from "firebase/firestore";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { db, storage } from "../config/firebase";
@@ -10,13 +16,24 @@ import {
 } from "firebase/storage";
 import { useLocation, useNavigate } from "react-router-dom";
 import { notify } from "../helpers/toastify";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+
+const validationSchema = Yup.object({
+    title: Yup.string()
+        .min(5, "Title must be at least 5 characters")
+        .max(25, "Title must be less than 25 characters")
+        .required("Title is required"),
+    body: Yup.string()
+        .min(5, "Body must be at least 5 characters")
+        .max(100, "Body must be less than 100 characters")
+        .required("Body is required"),
+});
 
 // eslint-disable-next-line react/prop-types
 export default function PostForm({ onSubmit }) {
     const { state } = useLocation();
     const initialPost = state?.post;
-    const [title, setTitle] = useState(initialPost?.title || "");
-    const [body, setBody] = useState(initialPost?.body || "");
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState(initialPost?.postImage || null);
     const { currentUser } = useAuth();
@@ -38,23 +55,23 @@ export default function PostForm({ onSubmit }) {
 
     const postsCollectionRef = collection(db, "posts");
 
-    const createPost = async () => {
+    const createPost = async (values) => {
         let postImageUrl = "";
         if (image) {
             const imageRef = ref(
                 storage,
-                `postImages/${image.name + Math.random}`
+                `postImages/${image.name + Math.random()}`
             );
             const snapshot = await uploadBytes(imageRef, image);
             postImageUrl = await getDownloadURL(snapshot.ref);
         }
 
         const newPost = {
-            title,
-            body,
+            ...values,
             userId: currentUser.uid,
             postImage: postImageUrl,
             likes: [], // Initialize likes as an empty array
+            createdAt: serverTimestamp(),
         };
 
         try {
@@ -66,7 +83,7 @@ export default function PostForm({ onSubmit }) {
         }
     };
 
-    const updatePost = async () => {
+    const updatePost = async (values) => {
         let postImageUrl = initialPost.postImage;
         if (image && image !== initialPost.postImage) {
             if (initialPost.postImage) {
@@ -77,7 +94,7 @@ export default function PostForm({ onSubmit }) {
             }
             const imageRef = ref(
                 storage,
-                `postImages/${image.name + Math.random}`
+                `postImages/${image.name + Math.random()}`
             );
             const snapshot = await uploadBytes(imageRef, image);
             postImageUrl = await getDownloadURL(snapshot.ref);
@@ -85,8 +102,7 @@ export default function PostForm({ onSubmit }) {
 
         const updatedPost = {
             ...initialPost,
-            title,
-            body,
+            ...values,
             postImage: postImageUrl,
             likes: initialPost.likes,
         };
@@ -101,6 +117,22 @@ export default function PostForm({ onSubmit }) {
         }
     };
 
+    const formik = useFormik({
+        initialValues: {
+            title: initialPost?.title || "",
+            body: initialPost?.body || "",
+        },
+        validationSchema,
+        onSubmit: async (values) => {
+            if (initialPost) {
+                await updatePost(values);
+            } else {
+                await createPost(values);
+            }
+            onSubmit(values);
+        },
+    });
+
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         setImage(file);
@@ -108,17 +140,6 @@ export default function PostForm({ onSubmit }) {
 
     const handleImageClick = () => {
         document.getElementById("imageInput").click();
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (initialPost) {
-            await updatePost();
-        } else {
-            await createPost();
-        }
-        onSubmit({ title, body, image });
     };
 
     return (
@@ -151,7 +172,7 @@ export default function PostForm({ onSubmit }) {
                 />
             </div>
             <div className="lg:w-1/2">
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={formik.handleSubmit}>
                     <div className="form-control mb-4">
                         <label className="label">
                             <span className="label-text">Post Title</span>
@@ -160,10 +181,14 @@ export default function PostForm({ onSubmit }) {
                             type="text"
                             placeholder="Title"
                             className="input input-bordered"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
+                            {...formik.getFieldProps("title")}
                             required
                         />
+                        {formik.touched.title && formik.errors.title ? (
+                            <div className="text-red-600">
+                                {formik.errors.title}
+                            </div>
+                        ) : null}
                     </div>
                     <div className="form-control mb-4">
                         <label className="label">
@@ -172,13 +197,17 @@ export default function PostForm({ onSubmit }) {
                         <textarea
                             className="textarea textarea-bordered"
                             placeholder="Body"
-                            value={body}
-                            onChange={(e) => setBody(e.target.value)}
+                            {...formik.getFieldProps("body")}
                             required
                         ></textarea>
+                        {formik.touched.body && formik.errors.body ? (
+                            <div className="text-red-600">
+                                {formik.errors.body}
+                            </div>
+                        ) : null}
                     </div>
                     <div className="form-control mt-6">
-                        <button className="btn btn-primary">
+                        <button className="btn btn-primary" type="submit">
                             {initialPost ? "Edit Post" : "Add Post"}
                         </button>
                     </div>

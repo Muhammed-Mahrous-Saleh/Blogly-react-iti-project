@@ -98,21 +98,31 @@ export default function Post({ postId, handleEdit }) {
     }
 
     return (
-        <div className="card lg:card-side bg-base-100 shadow-xl w-1/2 h-80">
-            <figure className="relative w-1/2">
-                <img src={post.postImage} alt="Post" />
+        <div className="card lg:card-side bg-base-100 shadow-xl w-3/4 h-96 flex flex-col lg:flex-row">
+            <figure className="relative w-full lg:w-1/2 h-1/2 lg:h-full overflow-hidden">
+                <img
+                    src={post.postImage}
+                    alt="Post"
+                    className="object-cover w-full h-full"
+                />
                 <div className="flex items-center text-center absolute bottom-5 left-5 h-fit">
                     <div className="cursor-pointer" onClick={handleLike}>
-                        <Heart filled={isLiked} />{" "}
+                        <Heart filled={isLiked} />
                     </div>
                     <div className="text-red-600">{likeCount}</div>
                 </div>
             </figure>
-            <div className="card-body">
-                <h2 className="card-title">{post.title}</h2>
-                <h4>by {postUser.displayName}</h4>{" "}
-                {/* Using userName from users collection */}
-                <p>{post.body}</p>
+            <div className="card-body w-full lg:w-1/2 flex flex-col justify-between">
+                <div>
+                    <h2 className="card-title break-words">{post.title}</h2>
+                    <h4 className="py-6">
+                        by{" "}
+                        <span className="font-bold">
+                            {postUser.displayName}
+                        </span>
+                    </h4>
+                    <p className="break-words">{post.body}</p>
+                </div>
                 {currentUser && currentUser.uid === post.userId && (
                     <div className="card-actions justify-end">
                         <button
