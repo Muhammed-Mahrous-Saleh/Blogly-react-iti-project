@@ -1,10 +1,9 @@
-import React from "react";
-
-export default function Heart() {
+// eslint-disable-next-line react/prop-types
+export default function Heart({ filled }) {
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"
-            fill="none"
+            fill={filled ? "red" : "none"}
             viewBox="0 0 24 24"
             className="inline-block h-8 w-8 stroke-current"
         >

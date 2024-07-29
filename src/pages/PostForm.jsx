@@ -1,9 +1,16 @@
 /* eslint-disable react/prop-types */
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { db, storage } from "../config/firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import {
+    ref,
+    uploadBytes,
+    getDownloadURL,
+    deleteObject,
+} from "firebase/storage";
+import { useNavigate } from "react-router-dom";
+import { notify } from "../helpers/toastify";
 
 function PostForm({ onSubmit, initialPost }) {
     const [title, setTitle] = useState(initialPost?.title || "");
@@ -11,6 +18,7 @@ function PostForm({ onSubmit, initialPost }) {
     const [image, setImage] = useState(initialPost?.image || null);
     const [preview, setPreview] = useState(null);
     const { currentUser } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (image) {
@@ -34,12 +42,53 @@ function PostForm({ onSubmit, initialPost }) {
             postImageUrl = await getDownloadURL(snapshot.ref);
         }
 
-        await addDoc(postsCollectionRef, {
+        const newPost = {
             title,
             body,
             userId: currentUser.uid,
-            postImage: postImageUrl, // Store the image URL
-        });
+            userName: currentUser.displayName,
+            postImage: postImageUrl,
+            likes: [], // Initialize likes as an empty array
+        };
+
+        try {
+            const docRef = await addDoc(postsCollectionRef, newPost);
+            notify("Post added successfully", "success");
+            navigate(`/post/${docRef.id}`);
+        } catch (error) {
+            notify("Failed to add the post", "error");
+        }
+    };
+
+    const updatePost = async () => {
+        let postImageUrl = initialPost.postImage;
+        if (image && image !== initialPost.image) {
+            if (initialPost.postImage) {
+                // Delete the old image from Firebase Storage
+                const oldImageRef = ref(storage, initialPost.postImage);
+                await deleteObject(oldImageRef);
+            }
+            // Upload the new image to Firebase Storage
+            const imageRef = ref(storage, `postImages/${image.name}`);
+            const snapshot = await uploadBytes(imageRef, image);
+            postImageUrl = await getDownloadURL(snapshot.ref);
+        }
+
+        const updatedPost = {
+            ...initialPost,
+            title,
+            body,
+            postImage: postImageUrl,
+        };
+
+        try {
+            const postDoc = doc(db, "posts", initialPost.id);
+            await updateDoc(postDoc, updatedPost);
+            notify("Post updated successfully", "success");
+            navigate(`/post/${initialPost.id}`);
+        } catch (error) {
+            notify("Failed to update the post", "error");
+        }
     };
 
     const handleImageChange = (e) => {
@@ -53,13 +102,19 @@ function PostForm({ onSubmit, initialPost }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        await createPost();
+
         const postData = {
             title,
             body,
             image,
         };
         onSubmit(postData);
+        if (initialPost) {
+            await updatePost();
+        } else {
+            await createPost();
+        }
+        navigate("/");
     };
 
     return (
