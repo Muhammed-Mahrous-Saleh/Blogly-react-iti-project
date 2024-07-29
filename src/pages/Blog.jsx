@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { Link, useNavigate } from "react-router-dom";
 import Post from "../components/Post";
 import PlusSign from "../icons/PlusSign";
@@ -37,6 +38,7 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
         console.log(posts);
     }, []);
     const { currentUser } = useAuth();
+    console.log("posts", posts);
     return (
         <div className="flex flex-col gap-5 my-7 w-full items-center mt-20">
             {currentUser && (
@@ -49,8 +51,9 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
                     <PlusSign />
                 </Link>
             )}
-            <Post />
-            <Post />
+            {posts.map((post) => (
+                <Post key={post.id} postId={post.id} />
+            ))}
         </div>
     );
 }

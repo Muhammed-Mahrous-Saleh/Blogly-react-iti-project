@@ -1,14 +1,16 @@
 /* eslint-disable react/prop-types */
 import { addDoc, collection } from "firebase/firestore";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { db } from "../config/firebase";
+import { db, storage } from "../config/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 function PostForm({ onSubmit, initialPost }) {
     const [title, setTitle] = useState(initialPost?.title || "");
     const [body, setBody] = useState(initialPost?.body || "");
     const [image, setImage] = useState(initialPost?.image || null);
     const [preview, setPreview] = useState(null);
+    const { currentUser } = useAuth();
 
     useEffect(() => {
         if (image) {
@@ -21,14 +23,22 @@ function PostForm({ onSubmit, initialPost }) {
             setPreview(null);
         }
     }, [image]);
-    const { currentUser } = useAuth();
+
     const postsCollectionRef = collection(db, "posts");
+
     const createPost = async () => {
+        let postImageUrl = "";
+        if (image) {
+            const imageRef = ref(storage, `postImages/${image.name}`);
+            const snapshot = await uploadBytes(imageRef, image);
+            postImageUrl = await getDownloadURL(snapshot.ref);
+        }
+
         await addDoc(postsCollectionRef, {
             title,
             body,
             userId: currentUser.uid,
-            postImage: "",
+            postImage: postImageUrl, // Store the image URL
         });
     };
 
@@ -41,9 +51,9 @@ function PostForm({ onSubmit, initialPost }) {
         document.getElementById("imageInput").click();
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        createPost();
+        await createPost();
         const postData = {
             title,
             body,

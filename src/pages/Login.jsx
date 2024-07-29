@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { auth, db } from "../config/firebase";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { useAuth } from "../context/AuthContext";
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
+    updateProfile,
 } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import EmailIcon from "../icons/EmailIcon";
 import UserIcon from "../icons/UserIcon";
 import KeyIcon from "../icons/KeyIcon";
@@ -34,23 +34,9 @@ const validationSchema = Yup.object({
 
 export default function Login() {
     const [isLoginMode, setIsLoginMode] = useState(true);
-    const { userInfo, currentUser } = useAuth();
 
     const closeModal = () => {
         document.getElementById("my_modal_1").close();
-    };
-
-    const fetchUserInfo = async (uid) => {
-        try {
-            const userDoc = doc(db, "users", uid);
-            const userSnapshot = await getDoc(userDoc);
-            if (userSnapshot.exists()) {
-                return userSnapshot.data();
-            }
-        } catch (error) {
-            console.error("Error fetching user info:", error);
-        }
-        return null;
     };
 
     const formik = useFormik({
@@ -69,11 +55,8 @@ export default function Login() {
                         values.email,
                         values.password
                     );
-                    const userInfo = await fetchUserInfo(user.uid);
                     notify(
-                        `Logged in successfully, Welcome back ${
-                            userInfo ? userInfo.username : ""
-                        }`,
+                        `Logged in successfully, Welcome back ${user.displayName}`,
                         "success"
                     );
                     closeModal();
@@ -91,15 +74,18 @@ export default function Login() {
                         values.email,
                         values.password
                     );
+                    await updateProfile(user, {
+                        displayName: values.username,
+                    });
+
                     await setDoc(doc(db, "users", user.uid), {
                         uid: user.uid,
                         email: values.email,
-                        username: values.username,
+                        displayName: values.username,
                     });
 
-                    const userInfo = await fetchUserInfo(user.uid);
                     notify(
-                        `Registered successfully, Hello ${userInfo.username}.`,
+                        `Registered successfully, Hello ${user.displayName}.`,
                         "success"
                     );
                     closeModal();

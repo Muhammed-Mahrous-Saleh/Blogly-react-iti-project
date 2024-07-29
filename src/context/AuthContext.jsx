@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../config/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
 const AuthContext = createContext();
 
@@ -9,6 +9,7 @@ export const useAuth = () => {
     return useContext(AuthContext);
 };
 
+// eslint-disable-next-line react/prop-types
 export const AuthProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
     const [userInfo, setUserInfo] = useState(null);
@@ -23,7 +24,17 @@ export const AuthProvider = ({ children }) => {
                 if (userSnapshot.exists()) {
                     setUserInfo(userSnapshot.data());
                 } else {
-                    setUserInfo(null);
+                    // If user document doesn't exist, create it
+                    await setDoc(userDoc, {
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: user.displayName || "",
+                    });
+                    setUserInfo({
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: user.displayName || "",
+                    });
                 }
             } else {
                 setUserInfo(null);
