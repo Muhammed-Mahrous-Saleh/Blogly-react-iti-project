@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
@@ -12,6 +11,7 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import { notify } from "../helpers/toastify";
 
+// eslint-disable-next-line react/prop-types
 export default function PostForm({ onSubmit }) {
     const { state } = useLocation();
     const initialPost = state?.post;
@@ -41,7 +41,10 @@ export default function PostForm({ onSubmit }) {
     const createPost = async () => {
         let postImageUrl = "";
         if (image) {
-            const imageRef = ref(storage, `postImages/${image.name}`);
+            const imageRef = ref(
+                storage,
+                `postImages/${image.name + Math.random}`
+            );
             const snapshot = await uploadBytes(imageRef, image);
             postImageUrl = await getDownloadURL(snapshot.ref);
         }
@@ -55,9 +58,9 @@ export default function PostForm({ onSubmit }) {
         };
 
         try {
-            const docRef = await addDoc(postsCollectionRef, newPost);
+            await addDoc(postsCollectionRef, newPost);
             notify("Post added successfully", "success");
-            navigate(`/post/${docRef.id}`);
+            navigate(`/`);
         } catch (error) {
             notify("Failed to add the post", "error");
         }
@@ -67,12 +70,15 @@ export default function PostForm({ onSubmit }) {
         let postImageUrl = initialPost.postImage;
         if (image && image !== initialPost.postImage) {
             if (initialPost.postImage) {
-                // Delete the old image from Firebase Storage
                 const oldImageRef = ref(storage, initialPost.postImage);
-                await deleteObject(oldImageRef);
+                await deleteObject(oldImageRef).catch((e) => {
+                    console.log("e", e);
+                });
             }
-            // Upload the new image to Firebase Storage
-            const imageRef = ref(storage, `postImages/${image.name}`);
+            const imageRef = ref(
+                storage,
+                `postImages/${image.name + Math.random}`
+            );
             const snapshot = await uploadBytes(imageRef, image);
             postImageUrl = await getDownloadURL(snapshot.ref);
         }
@@ -82,13 +88,14 @@ export default function PostForm({ onSubmit }) {
             title,
             body,
             postImage: postImageUrl,
+            likes: initialPost.likes,
         };
 
         try {
             const postDoc = doc(db, "posts", initialPost.id);
             await updateDoc(postDoc, updatedPost);
             notify("Post updated successfully", "success");
-            navigate(`/post/${initialPost.id}`);
+            navigate(`/`);
         } catch (error) {
             notify("Failed to update the post", "error");
         }
@@ -106,30 +113,26 @@ export default function PostForm({ onSubmit }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const postData = {
-            title,
-            body,
-            image,
-        };
-        onSubmit(postData);
         if (initialPost) {
             await updatePost();
         } else {
             await createPost();
         }
-        navigate("/");
+        onSubmit({ title, body, image });
     };
 
     return (
         <div className="p-4 max-w-4xl mx-auto flex flex-col lg:flex-row gap-4">
-            <div className="flex flex-col items-center justify-center lg:w-1/2">
+            <div className="card lg:card-side bg-base-100 shadow-xl w-1/2 h-80">
                 {preview ? (
-                    <img
-                        src={preview}
-                        alt="Preview"
-                        className="w-full h-auto cursor-pointer"
-                        onClick={handleImageClick}
-                    />
+                    <figure className="relative">
+                        <img
+                            src={preview}
+                            alt="Preview"
+                            className="cursor-pointer"
+                            onClick={handleImageClick}
+                        />
+                    </figure>
                 ) : (
                     <div
                         className="w-full h-64 bg-gray-200 flex items-center justify-center cursor-pointer"

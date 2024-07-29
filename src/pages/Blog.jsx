@@ -4,20 +4,20 @@ import Post from "../components/Post";
 import PlusSign from "../icons/PlusSign";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../config/firebase";
-import { getDocs, collection, doc } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { getDocs, collection } from "firebase/firestore";
+import { useEffect } from "react";
 
 // eslint-disable-next-line react/prop-types
 export default function Blog({ posts, setPosts, setEditingPost }) {
-    const navigator = useNavigate();
+    const navigate = useNavigate();
     function handleAddPost(e) {
         e.preventDefault();
         setEditingPost(null);
-        navigator("/post");
+        navigate("/post");
     }
     function handleEditPost(post) {
         setEditingPost(post);
-        navigator("/post");
+        navigate(`/post`, { state: { post } });
     }
     useEffect(() => {
         (async () => {
@@ -49,13 +49,14 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
                     <PlusSign />
                 </Link>
             )}
-            {posts.map((post) => (
-                <Post
-                    key={post.id}
-                    postId={post.id}
-                    handleEdit={() => handleEditPost(post)}
-                />
-            ))}
+            {posts.length > 0 &&
+                posts.map((post) => (
+                    <Post
+                        key={post.id}
+                        postId={post.id}
+                        handleEdit={() => handleEditPost(post)}
+                    />
+                ))}
         </div>
     );
 }

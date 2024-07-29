@@ -15,7 +15,7 @@ import { notify } from "../helpers/toastify";
 import { deleteObject, ref } from "firebase/storage";
 
 // eslint-disable-next-line react/prop-types
-export default function Post({ postId }) {
+export default function Post({ postId, handleEdit }) {
     const { currentUser } = useAuth();
     const [post, setPost] = useState(null);
     const [postUser, setPostUser] = useState(null);
@@ -70,19 +70,20 @@ export default function Post({ postId }) {
     const handleDelete = async () => {
         if (window.confirm("Are you sure you want to delete this post?")) {
             setPost(null); // Optimistically remove the post from the UI
+            notify("Post deleted successfully", "success");
             try {
                 const postDoc = doc(db, "posts", postId);
                 const postSnapshot = await getDoc(postDoc);
                 if (postSnapshot.exists()) {
                     const postData = postSnapshot.data();
-
                     // Delete the image from Firebase Storage
                     if (postData.postImage) {
                         const imageRef = ref(storage, postData.postImage);
+                        console.log("imageRef", imageRef);
                         await deleteObject(imageRef);
                     }
                     await deleteDoc(postDoc);
-                    notify("Post deleted successfully", "success");
+
                     navigate("/"); // Redirect to the home page after deletion
                 }
             } catch (error) {
@@ -92,12 +93,8 @@ export default function Post({ postId }) {
         }
     };
 
-    const handleEdit = () => {
-        navigate(`/post`, { state: { post } }); // Pass the current post data to the edit page
-    };
-
     if (!post || !postUser) {
-        return <div>Loading...</div>;
+        return <div></div>;
     }
 
     return (
@@ -108,7 +105,7 @@ export default function Post({ postId }) {
                     <div className="cursor-pointer" onClick={handleLike}>
                         <Heart filled={isLiked} />{" "}
                     </div>
-                    <div>{likeCount}</div>
+                    <div className="text-red-600">{likeCount}</div>
                 </div>
             </figure>
             <div className="card-body">
