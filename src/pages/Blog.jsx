@@ -6,9 +6,8 @@ import { db } from "../config/firebase";
 import { getDocs, collection, doc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
-export default function Blog() {
-    const [posts, setPosts] = useState([]);
-
+// eslint-disable-next-line react/prop-types
+export default function Blog({ posts, setPosts }) {
     useEffect(() => {
         (async () => {
             try {
@@ -25,6 +24,7 @@ export default function Blog() {
                 console.error(err);
             }
         })();
+        console.log(posts);
     }, []);
     console.log("posts", posts);
     const { currentUser } = useAuth();
