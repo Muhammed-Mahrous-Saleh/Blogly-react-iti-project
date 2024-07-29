@@ -7,7 +7,7 @@ import {
     arrayUnion,
     arrayRemove,
     deleteDoc,
-} from "firebase/firestore"; // Import necessary functions
+} from "firebase/firestore";
 import Heart from "../icons/Heart";
 import { useAuth } from "../context/AuthContext";
 import { db, storage } from "../config/firebase";
@@ -69,7 +69,8 @@ export default function Post({ postId, handleEdit }) {
 
     const handleDelete = async () => {
         if (window.confirm("Are you sure you want to delete this post?")) {
-            setPost(null); // Optimistically remove the post from the UI
+            //  optemisticly remove post from ui
+            setPost(null);
             notify("Post deleted successfully", "success");
             try {
                 const postDoc = doc(db, "posts", postId);
@@ -84,11 +85,13 @@ export default function Post({ postId, handleEdit }) {
                     }
                     await deleteDoc(postDoc);
 
-                    navigate("/"); // Redirect to the home page after deletion
+                    // redirect to home page
+                    navigate("/");
                 }
             } catch (error) {
                 notify("Failed to delete the post", "error");
-                setPost(post); // Revert the optimistic UI change
+                // revert the optimistic UI change
+                setPost(post);
             }
         }
     };
