@@ -19,7 +19,7 @@ function NavBar() {
     };
 
     return (
-        <div className="navbar bg-base-100 container mx-auto">
+        <div className="navbar bg-base-100 container mx-auto fixed z-50">
             <div className="navbar-start">
                 <Link
                     to="/"
