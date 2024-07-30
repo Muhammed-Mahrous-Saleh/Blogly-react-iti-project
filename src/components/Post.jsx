@@ -80,7 +80,6 @@ export default function Post({ postId, handleEdit }) {
                     // Delete the image from Firebase Storage
                     if (postData.postImage) {
                         const imageRef = ref(storage, postData.postImage);
-                        console.log("imageRef", imageRef);
                         await deleteObject(imageRef);
                     }
                     await deleteDoc(postDoc);

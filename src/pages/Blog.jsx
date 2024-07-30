@@ -4,15 +4,14 @@ import Post from "../components/Post";
 import PlusSign from "../icons/PlusSign";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../config/firebase";
-import { getDocs, collection, query, orderBy } from "firebase/firestore";
+import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
-// eslint-disable-next-line react/prop-types
 export default function Blog({ posts, setPosts, setEditingPost }) {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
-    const [filtered, setFitlered] = useState(posts);
+    const [filtered, setFiltered] = useState(posts);
 
     function handleAddPost(e) {
         e.preventDefault();
@@ -28,7 +27,7 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
     function handleSearch(e) {
         setSearch(e.target.value);
 
-        setFitlered(
+        setFiltered(
             posts.filter(
                 (post) =>
                     post.body
@@ -42,26 +41,26 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
     }
 
     useEffect(() => {
-        (async () => {
-            try {
-                const postCollectionRef = collection(db, "posts");
-                const q = query(
-                    postCollectionRef,
-                    orderBy("createdAt", "desc")
-                );
-                const res = await getDocs(q);
-                const data = res.docs.map((doc) => ({
+        const postCollectionRef = collection(db, "posts");
+        const q = query(postCollectionRef, orderBy("createdAt", "desc"));
+
+        const unsubscribe = onSnapshot(
+            q,
+            (snapshot) => {
+                const posts = snapshot.docs.map((doc) => ({
                     ...doc.data(),
                     id: doc.id,
                 }));
-                setPosts(data);
-                setFitlered(data);
-            } catch (err) {
-                console.error(err);
-            } finally {
+                setPosts(posts);
+                setFiltered(posts);
                 setLoading(false);
+            },
+            (error) => {
+                console.error("Failed to fetch posts:", error);
             }
-        })();
+        );
+
+        return () => unsubscribe(); // Clean up the subscription
     }, [setPosts]);
 
     const { currentUser } = useAuth();
