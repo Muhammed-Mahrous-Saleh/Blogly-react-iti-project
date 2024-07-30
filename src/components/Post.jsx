@@ -18,6 +18,7 @@ import { deleteObject, ref } from "firebase/storage";
 export default function Post({ postId, handleEdit }) {
     const { currentUser } = useAuth();
     const [post, setPost] = useState(null);
+    const [showImageOverlay, setShowImageOverlay] = useState(false);
     const [postUser, setPostUser] = useState(null);
     const [isLiked, setIsLiked] = useState(false);
     const [likeCount, setLikeCount] = useState(0);
@@ -95,6 +96,10 @@ export default function Post({ postId, handleEdit }) {
         }
     };
 
+    const toggleImageOverlay = () => {
+        setShowImageOverlay(!showImageOverlay);
+    };
+
     if (!post || !postUser) {
         return <div></div>;
     }
@@ -105,7 +110,8 @@ export default function Post({ postId, handleEdit }) {
                 <img
                     src={post.postImage}
                     alt="Post"
-                    className="object-cover w-full h-full"
+                    className="object-cover w-full h-full cursor-pointer"
+                    onClick={toggleImageOverlay}
                 />
                 <div className="flex items-center text-center absolute bottom-5 left-5 h-fit">
                     <div className="cursor-pointer" onClick={handleLike}>
@@ -113,6 +119,21 @@ export default function Post({ postId, handleEdit }) {
                     </div>
                     <div className="text-red-600">{likeCount}</div>
                 </div>
+                {showImageOverlay && (
+                    <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-80 flex items-center justify-center z-50">
+                        <img
+                            src={post.postImage}
+                            alt="Full view"
+                            className="max-w-full max-h-full p-4"
+                        />
+                        <button
+                            className="absolute top-5 right-5 text-white text-2xl"
+                            onClick={toggleImageOverlay}
+                        >
+                            &times;
+                        </button>
+                    </div>
+                )}
             </figure>
             <div className="card-body w-full lg:w-1/2 flex flex-col justify-between">
                 <div>
