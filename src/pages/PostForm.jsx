@@ -21,10 +21,12 @@ import * as Yup from "yup";
 
 const validationSchema = Yup.object({
     title: Yup.string()
+        .trim()
         .min(5, "Title must be at least 5 characters")
         .max(25, "Title must be less than 25 characters")
         .required("Title is required"),
     body: Yup.string()
+        .trim()
         .min(5, "Body must be at least 5 characters")
         .max(100, "Body must be less than 100 characters")
         .required("Body is required"),
@@ -124,6 +126,10 @@ export default function PostForm({ onSubmit }) {
         },
         validationSchema,
         onSubmit: async (values) => {
+            if (!image) {
+                notify("Please select an image.", "info");
+                return; // Stop the submission if no image
+            }
             if (initialPost) {
                 await updatePost(values);
             } else {
@@ -169,6 +175,7 @@ export default function PostForm({ onSubmit }) {
                     id="imageInput"
                     className="hidden"
                     onChange={handleImageChange}
+                    accept="image/jpeg, image/png, image/gif"
                 />
             </div>
             <div className="lg:w-1/2">
