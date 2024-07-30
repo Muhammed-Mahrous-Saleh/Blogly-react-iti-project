@@ -83,7 +83,7 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
                         onClick={(e) => {
                             handleAddPost(e);
                         }}
-                        className="fixed bottom-10 btn btn-circle bg-blue-700 hover:bg-blue-800 text-white self-end me-24"
+                        className="fixed bottom-10 btn btn-circle bg-blue-700 hover:bg-blue-800 text-white self-end me-5 lg:me-24 z-20 "
                     >
                         <PlusSign />
                     </Link>
