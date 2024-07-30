@@ -89,7 +89,7 @@ export default function PostForm({ onSubmit }) {
             if (initialPost.postImage) {
                 const oldImageRef = ref(storage, initialPost.postImage);
                 await deleteObject(oldImageRef).catch((e) => {
-                    console.log("e", e);
+                    console.error("error", e);
                 });
             }
             const imageRef = ref(
