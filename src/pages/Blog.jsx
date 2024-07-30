@@ -55,6 +55,7 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
                     id: doc.id,
                 }));
                 setPosts(data);
+                setFitlered(data);
             } catch (err) {
                 console.error(err);
             } finally {
@@ -64,6 +65,8 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
     }, [setPosts]);
 
     const { currentUser } = useAuth();
+    console.log("posts", posts);
+    console.log("filtered", filtered);
 
     return (
         <div className="flex flex-col gap-5 my-7 w-full items-center mt-20">
@@ -126,6 +129,10 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
                         {posts.length === 0 ? (
                             <div className="text-5xl font-bold text-gray-400">
                                 No posts
+                            </div>
+                        ) : filtered.length === 0 ? (
+                            <div className="text-5xl font-bold text-gray-400">
+                                No posts for {search} key words.
                             </div>
                         ) : (
                             filtered.map((post) => (
