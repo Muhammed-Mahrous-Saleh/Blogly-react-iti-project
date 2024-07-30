@@ -16,7 +16,6 @@ function App() {
 
     const handleAddPost = (post) => {
         setPosts([...posts, post]);
-        console.log("Post added:", post);
     };
 
     const handleEditPost = (post) => {
@@ -25,7 +24,6 @@ function App() {
         );
         setPosts(updatedPosts);
         setEditingPost(null);
-        console.log("Post edited:", post);
     };
     return (
         <div className="flex flex-col min-h-screen box-border">

@@ -143,7 +143,7 @@ export default function PostForm({ onSubmit }) {
     };
 
     return (
-        <div className="p-4 max-w-4xl mx-auto flex flex-col lg:flex-row gap-4">
+        <div className="p-4 max-w-4xl mx-auto flex flex-col lg:flex-row gap-4 mt-20">
             <div className="card lg:card-side bg-base-100 shadow-xl w-1/2 h-80">
                 {preview ? (
                     <figure className="relative">

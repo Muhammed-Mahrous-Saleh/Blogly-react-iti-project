@@ -65,8 +65,6 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
     }, [setPosts]);
 
     const { currentUser } = useAuth();
-    console.log("posts", posts);
-    console.log("filtered", filtered);
 
     return (
         <div className="flex flex-col gap-5 my-7 w-full items-center mt-20">
