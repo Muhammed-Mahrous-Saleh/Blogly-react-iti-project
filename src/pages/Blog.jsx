@@ -183,7 +183,7 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
                                     postId={post.id}
                                     handleEdit={() => handleEditPost(post)}
                                     post={post}
-                                    handleDelete={handleDelete}
+                                    handleDelete={() => handleDelete(post)}
                                     data-x={console.log(filtered)}
                                 />
                             ))
