@@ -3,9 +3,19 @@ import { Link, useNavigate } from "react-router-dom";
 import Post from "../components/Post";
 import PlusSign from "../icons/PlusSign";
 import { useAuth } from "../context/AuthContext";
-import { db } from "../config/firebase";
-import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import { db, storage } from "../config/firebase";
+import {
+    collection,
+    query,
+    orderBy,
+    onSnapshot,
+    doc,
+    getDoc,
+    deleteDoc,
+} from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { notify } from "../helpers/toastify";
+import { deleteObject, ref } from "firebase/storage";
 
 export default function Blog({ posts, setPosts, setEditingPost }) {
     const navigate = useNavigate();
@@ -23,6 +33,34 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
         setEditingPost(post);
         navigate(`/post`, { state: { post } });
     }
+
+    const handleDelete = async (post) => {
+        if (window.confirm("Are you sure you want to delete this post?")) {
+            //  optemisticly remove post from ui
+            setPosts((prev) => prev.filter((p) => p != post));
+            notify("Post deleted successfully", "success");
+            try {
+                const postDoc = doc(db, "posts", post.id);
+                const postSnapshot = await getDoc(postDoc);
+                if (postSnapshot.exists()) {
+                    const postData = postSnapshot.data();
+                    // Delete the image from Firebase Storage
+                    if (postData.postImage) {
+                        const imageRef = ref(storage, postData.postImage);
+                        await deleteObject(imageRef);
+                    }
+                    await deleteDoc(postDoc);
+
+                    // redirect to home page
+                    navigate("/");
+                }
+            } catch (error) {
+                notify("Failed to delete the post", "error");
+                // revert the optimistic UI change
+                setPosts((prev) => [...prev, post]);
+            }
+        }
+    };
 
     function handleSearch(e) {
         setSearch(e.target.value);
@@ -144,6 +182,8 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
                                     key={post.id}
                                     postId={post.id}
                                     handleEdit={() => handleEditPost(post)}
+                                    post={post}
+                                    handleDelete={handleDelete}
                                     data-x={console.log(filtered)}
                                 />
                             ))

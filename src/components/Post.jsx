@@ -15,7 +15,7 @@ import { notify } from "../helpers/toastify";
 import { deleteObject, ref } from "firebase/storage";
 
 // eslint-disable-next-line react/prop-types
-export default function Post({ postId, handleEdit }) {
+export default function Post({ postId, handleEdit, handleDelete }) {
     const { currentUser } = useAuth();
     const [post, setPost] = useState(null);
     const [postUser, setPostUser] = useState(null);
@@ -67,34 +67,6 @@ export default function Post({ postId, handleEdit }) {
         }
     };
 
-    const handleDelete = async () => {
-        if (window.confirm("Are you sure you want to delete this post?")) {
-            //  optemisticly remove post from ui
-            setPost(null);
-            notify("Post deleted successfully", "success");
-            try {
-                const postDoc = doc(db, "posts", postId);
-                const postSnapshot = await getDoc(postDoc);
-                if (postSnapshot.exists()) {
-                    const postData = postSnapshot.data();
-                    // Delete the image from Firebase Storage
-                    if (postData.postImage) {
-                        const imageRef = ref(storage, postData.postImage);
-                        await deleteObject(imageRef);
-                    }
-                    await deleteDoc(postDoc);
-
-                    // redirect to home page
-                    navigate("/");
-                }
-            } catch (error) {
-                notify("Failed to delete the post", "error");
-                // revert the optimistic UI change
-                setPost(post);
-            }
-        }
-    };
-
     if (!post || !postUser) {
         return <div></div>;
     }
@@ -128,7 +100,7 @@ export default function Post({ postId, handleEdit }) {
                 {currentUser && currentUser.uid === post.userId && (
                     <div className="card-actions justify-end">
                         <button
-                            onClick={handleDelete}
+                            onClick={() => handleDelete(post)}
                             type="button"
                             className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
                         >
