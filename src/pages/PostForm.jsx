@@ -38,6 +38,7 @@ export default function PostForm({ onSubmit }) {
     const initialPost = state?.post;
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState(initialPost?.postImage || null);
+    const [loading, setLoading] = useState(false);
     const { currentUser } = useAuth();
     const navigate = useNavigate();
 
@@ -86,6 +87,7 @@ export default function PostForm({ onSubmit }) {
     };
 
     const updatePost = async (values) => {
+        setLoading(true);
         let postImageUrl = initialPost.postImage;
         if (image && image !== initialPost.postImage) {
             if (initialPost.postImage) {
@@ -126,7 +128,7 @@ export default function PostForm({ onSubmit }) {
         },
         validationSchema,
         onSubmit: async (values) => {
-            if (!image) {
+            if (!image && preview == null) {
                 notify("Please select an image.", "info");
                 return; // Stop the submission if no image
             }
@@ -135,6 +137,7 @@ export default function PostForm({ onSubmit }) {
             } else {
                 await createPost(values);
             }
+
             onSubmit(values);
         },
     });
@@ -215,7 +218,11 @@ export default function PostForm({ onSubmit }) {
                     </div>
                     <div className="form-control mt-6">
                         <button className="btn btn-primary" type="submit">
-                            {initialPost ? "Edit Post" : "Add Post"}
+                            {loading
+                                ? "Posting ..."
+                                : initialPost
+                                ? "Edit Post"
+                                : "Add Post"}
                         </button>
                     </div>
                 </form>

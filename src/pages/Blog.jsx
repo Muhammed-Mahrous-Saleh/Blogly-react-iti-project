@@ -11,7 +11,7 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
-    const [filtered, setFiltered] = useState(posts);
+    // const [filtered, setFiltered] = useState(posts);
 
     function handleAddPost(e) {
         e.preventDefault();
@@ -27,18 +27,26 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
     function handleSearch(e) {
         setSearch(e.target.value);
 
-        setFiltered(
-            posts.filter(
-                (post) =>
-                    post.body
-                        .toLowerCase()
-                        .includes(e.target.value.toLowerCase()) ||
-                    post.title
-                        .toLowerCase()
-                        .includes(e.target.value.toLowerCase())
-            )
-        );
+        // setFiltered(
+        //     posts.filter(
+        //         (post) =>
+        //             post.body
+        //                 .toLowerCase()
+        //                 .includes(e.target.value.toLowerCase()) ||
+        //             post.title
+        //                 .toLowerCase()
+        //                 .includes(e.target.value.toLowerCase())
+        //     )
+        // );
     }
+
+    const filtered = search
+        ? posts.filter(
+              (post) =>
+                  post.body.toLowerCase().includes(search.toLowerCase()) ||
+                  post.title.toLowerCase().includes(search.toLowerCase())
+          )
+        : posts;
 
     useEffect(() => {
         const postCollectionRef = collection(db, "posts");
@@ -52,7 +60,6 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
                     id: doc.id,
                 }));
                 setPosts(posts);
-                setFiltered(posts);
                 setLoading(false);
             },
             (error) => {
@@ -137,6 +144,7 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
                                     key={post.id}
                                     postId={post.id}
                                     handleEdit={() => handleEditPost(post)}
+                                    data-x={console.log(filtered)}
                                 />
                             ))
                         )}
