@@ -1,18 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
     doc,
     getDoc,
     updateDoc,
     arrayUnion,
     arrayRemove,
-    deleteDoc,
 } from "firebase/firestore";
 import Heart from "../icons/Heart";
 import { useAuth } from "../context/AuthContext";
-import { db, storage } from "../config/firebase";
-import { notify } from "../helpers/toastify";
-import { deleteObject, ref } from "firebase/storage";
+import { db } from "../config/firebase";
 
 // eslint-disable-next-line react/prop-types
 export default function Post({ postId, handleEdit, handleDelete }) {
