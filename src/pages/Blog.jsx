@@ -180,7 +180,6 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
                             filtered.map((post) => (
                                 <Post
                                     key={post.id}
-                                    postId={post.id}
                                     handleEdit={() => handleEditPost(post)}
                                     post={post}
                                     handleDelete={() => handleDelete(post)}

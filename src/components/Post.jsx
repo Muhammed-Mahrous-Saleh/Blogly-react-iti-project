@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useEffect, useState } from "react";
 import {
     doc,
@@ -11,39 +12,28 @@ import { useAuth } from "../context/AuthContext";
 import { db } from "../config/firebase";
 
 // eslint-disable-next-line react/prop-types
-export default function Post({ postId, handleEdit, handleDelete }) {
+export default function Post({ handleEdit, handleDelete, post }) {
     const { currentUser } = useAuth();
-    const [post, setPost] = useState(null);
+    // const [post, setPost] = useState(null);
     const [postUser, setPostUser] = useState(null);
-    const [isLiked, setIsLiked] = useState(false);
-    const [likeCount, setLikeCount] = useState(0);
+    const [isLiked, setIsLiked] = useState(
+        post.likes.includes(currentUser.uid)
+    );
+    const [likeCount, setLikeCount] = useState(post.likes.length);
 
     useEffect(() => {
-        const fetchPost = async () => {
-            const postDoc = doc(db, "posts", postId);
-            const postSnapshot = await getDoc(postDoc);
-            if (postSnapshot.exists()) {
-                const postData = postSnapshot.data();
-                setPost(postData);
-                setLikeCount(postData.likes.length);
-                if (currentUser)
-                    setIsLiked(postData.likes.includes(currentUser.uid));
-                else setIsLiked(false);
-
-                const userDoc = doc(db, "users", postData.userId);
-                const userSnapshot = await getDoc(userDoc);
-                if (userSnapshot.exists()) {
-                    setPostUser(userSnapshot.data());
-                }
+        (async () => {
+            const userDoc = doc(db, "users", post.userId);
+            const userSnapshot = await getDoc(userDoc);
+            if (userSnapshot.exists()) {
+                setPostUser(userSnapshot.data());
             }
-        };
-
-        fetchPost();
-    }, [postId, currentUser]);
+        })();
+    }, [post, currentUser]);
 
     const handleLike = async () => {
         if (currentUser) {
-            const postDoc = doc(db, "posts", postId);
+            const postDoc = doc(db, "posts", post.id);
             if (isLiked) {
                 await updateDoc(postDoc, {
                     likes: arrayRemove(currentUser.uid),
