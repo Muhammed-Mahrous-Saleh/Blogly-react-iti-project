@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { Link, useNavigate } from "react-router-dom";
 import Post from "../components/Post";
+import ImageOverlay from "../components/ImageOverlay";
 import PlusSign from "../icons/PlusSign";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../config/firebase";
@@ -12,6 +13,8 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [filtered, setFiltered] = useState(posts);
+    const [showImageOverlay, setShowImageOverlay] = useState(false);
+    const [overlayImage, setOverlayImage] = useState(null);
 
     function handleAddPost(e) {
         e.preventDefault();
@@ -65,8 +68,19 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
 
     const { currentUser } = useAuth();
 
+    const toggleImageOverlay = (postImage) => {
+        setShowImageOverlay(!showImageOverlay);
+        setOverlayImage((!showImageOverlay && postImage) || null);
+    };
+
     return (
         <div className="flex flex-col gap-5 my-7 w-full items-center mt-20">
+            {showImageOverlay && (
+                <ImageOverlay
+                    overlayImage={overlayImage}
+                    toggleImageOverlay={toggleImageOverlay}
+                />
+            )}
             <label className="input input-bordered flex items-center gap-2 w-1/2">
                 <input
                     type="text"
@@ -136,6 +150,9 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
                                 <Post
                                     key={post.id}
                                     postId={post.id}
+                                    toggleImageOverlay={() =>
+                                        toggleImageOverlay(post.postImage)
+                                    }
                                     handleEdit={() => handleEditPost(post)}
                                 />
                             ))
