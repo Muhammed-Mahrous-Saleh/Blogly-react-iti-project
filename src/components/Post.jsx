@@ -10,6 +10,7 @@ import {
 import Heart from "../icons/Heart";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../config/firebase";
+import { formatDistanceToNow } from "date-fns";
 
 // eslint-disable-next-line react/prop-types
 export default function Post({ handleEdit, handleDelete, post }) {
@@ -56,6 +57,18 @@ export default function Post({ handleEdit, handleDelete, post }) {
         return <div></div>;
     }
 
+    // Convert post createdAt Date object
+    const ceatedAtDate = new Date(
+        post.createdAt.seconds * 1000 + post.createdAt.nanoseconds / 1000000
+    );
+
+    const updatedAtDate = post.updatedAt
+        ? new Date(
+              post.updatedAt.seconds * 1000 +
+                  post.updatedAt.nanoseconds / 1000000
+          )
+        : null;
+
     return (
         <div className="card lg:card-side bg-base-100 shadow-xl w-3/4 h-96 flex flex-col lg:flex-row">
             <figure className="relative w-full lg:w-1/2 h-1/2 lg:h-full overflow-hidden">
@@ -74,12 +87,27 @@ export default function Post({ handleEdit, handleDelete, post }) {
             <div className="card-body w-full lg:w-1/2 flex flex-col justify-between">
                 <div>
                     <h2 className="card-title break-words">{post.title}</h2>
-                    <h4 className="py-6">
+                    <h4 className="py-6 flex flex-wrap gap-2">
                         by{" "}
                         <span className="font-bold">
                             {postUser.displayName}
                         </span>
+                        <span>
+                            &bull;&ensp;
+                            {formatDistanceToNow(ceatedAtDate, {
+                                addSuffix: true,
+                            })}
+                        </span>
+                        {updatedAtDate && (
+                            <span className="">
+                                last update&ensp;
+                                {formatDistanceToNow(updatedAtDate, {
+                                    addSuffix: true,
+                                })}
+                            </span>
+                        )}
                     </h4>
+
                     <p className="break-words">{post.body}</p>
                 </div>
                 {currentUser && currentUser.uid === post.userId && (
@@ -100,6 +128,7 @@ export default function Post({ handleEdit, handleDelete, post }) {
                         </button>
                     </div>
                 )}
+                {console.log()}
             </div>
         </div>
     );
