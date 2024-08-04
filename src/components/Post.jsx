@@ -17,7 +17,7 @@ export default function Post({ handleEdit, handleDelete, post }) {
     // const [post, setPost] = useState(null);
     const [postUser, setPostUser] = useState(null);
     const [isLiked, setIsLiked] = useState(
-        post.likes.includes(currentUser.uid)
+        post.likes.includes(currentUser?.uid)
     );
     const [likeCount, setLikeCount] = useState(post.likes.length);
 

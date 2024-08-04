@@ -21,7 +21,6 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
-    // const [filtered, setFiltered] = useState(posts);
 
     function handleAddPost(e) {
         e.preventDefault();
@@ -64,18 +63,6 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
 
     function handleSearch(e) {
         setSearch(e.target.value);
-
-        // setFiltered(
-        //     posts.filter(
-        //         (post) =>
-        //             post.body
-        //                 .toLowerCase()
-        //                 .includes(e.target.value.toLowerCase()) ||
-        //             post.title
-        //                 .toLowerCase()
-        //                 .includes(e.target.value.toLowerCase())
-        //     )
-        // );
     }
 
     const filtered = search
@@ -183,7 +170,6 @@ export default function Blog({ posts, setPosts, setEditingPost }) {
                                     handleEdit={() => handleEditPost(post)}
                                     post={post}
                                     handleDelete={() => handleDelete(post)}
-                                    data-x={console.log(filtered)}
                                 />
                             ))
                         )}
