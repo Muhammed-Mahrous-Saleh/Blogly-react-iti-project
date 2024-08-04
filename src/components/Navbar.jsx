@@ -6,7 +6,6 @@ import { useAuth } from "../context/AuthContext";
 import { notify } from "../helpers/toastify";
 
 function NavBar() {
-    // let currentUser = false;
     const { currentUser } = useAuth();
 
     const handleLogOut = async () => {

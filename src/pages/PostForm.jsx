@@ -3,6 +3,7 @@ import {
     collection,
     doc,
     serverTimestamp,
+    Timestamp,
     updateDoc,
 } from "firebase/firestore";
 import { useState, useEffect } from "react";
@@ -82,12 +83,12 @@ export default function PostForm({ onSubmit }) {
             notify("Post added successfully", "success");
             navigate(`/`);
         } catch (error) {
+            setLoading(false);
             notify("Failed to add the post", "error");
         }
     };
 
     const updatePost = async (values) => {
-        setLoading(true);
         let postImageUrl = initialPost.postImage;
         if (image && image !== initialPost.postImage) {
             if (initialPost.postImage) {
@@ -107,6 +108,13 @@ export default function PostForm({ onSubmit }) {
         const updatedPost = {
             ...initialPost,
             ...values,
+            createdAt: Timestamp.fromDate(
+                new Date(
+                    initialPost.createdAt.seconds * 1000 +
+                        initialPost.createdAt.nanoseconds / 1000000
+                )
+            ),
+            updatedAt: serverTimestamp(),
             postImage: postImageUrl,
             likes: initialPost.likes,
         };
@@ -117,6 +125,7 @@ export default function PostForm({ onSubmit }) {
             notify("Post updated successfully", "success");
             navigate(`/`);
         } catch (error) {
+            setLoading(false);
             notify("Failed to update the post", "error");
         }
     };
@@ -132,6 +141,7 @@ export default function PostForm({ onSubmit }) {
                 notify("Please select an image.", "info");
                 return; // Stop the submission if no image
             }
+            setLoading(true);
             if (initialPost) {
                 await updatePost(values);
             } else {
