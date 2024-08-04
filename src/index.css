@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.text-transparent-reverse {
+    mix-blend-mode: difference;
+    color: white;
+}

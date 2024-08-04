@@ -8,14 +8,19 @@ import {
     arrayRemove,
 } from "firebase/firestore";
 import Heart from "../icons/Heart";
+import IconArrowsFullscreen from "../icons/Fullscreen";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../config/firebase";
 import { formatDistanceToNow } from "date-fns";
 
 // eslint-disable-next-line react/prop-types
-export default function Post({ handleEdit, handleDelete, post }) {
+export default function Post({
+    handleEdit,
+    handleDelete,
+    post,
+    toggleImageOverlay,
+}) {
     const { currentUser } = useAuth();
-    // const [post, setPost] = useState(null);
     const [postUser, setPostUser] = useState(null);
     const [isLiked, setIsLiked] = useState(
         post.likes.includes(currentUser?.uid)
@@ -82,6 +87,14 @@ export default function Post({ handleEdit, handleDelete, post }) {
                         <Heart filled={isLiked} />
                     </div>
                     <div className="text-red-600">{likeCount}</div>
+                </div>
+                <div className="flex items-center text-center absolute bottom-5 right-5 w-fit h-fit text-transparent-reverse ">
+                    <div
+                        className="cursor-pointer"
+                        onClick={toggleImageOverlay}
+                    >
+                        <IconArrowsFullscreen />
+                    </div>
                 </div>
             </figure>
             <div className="card-body w-full lg:w-1/2 flex flex-col justify-between">
