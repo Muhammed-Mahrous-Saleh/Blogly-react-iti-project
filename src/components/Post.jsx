@@ -22,9 +22,7 @@ export default function Post({
 }) {
     const { currentUser } = useAuth();
     const [postUser, setPostUser] = useState(null);
-    const [isLiked, setIsLiked] = useState(
-        post.likes.includes(currentUser?.uid)
-    );
+    const [isLiked, setIsLiked] = useState(false);
     const [likeCount, setLikeCount] = useState(post.likes.length);
 
     useEffect(() => {
@@ -35,6 +33,7 @@ export default function Post({
                 setPostUser(userSnapshot.data());
             }
         })();
+        setIsLiked(post.likes.includes(currentUser?.uid));
     }, [post, currentUser]);
 
     const handleLike = async () => {
